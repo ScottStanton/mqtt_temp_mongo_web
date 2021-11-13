@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+#
+# This software is covered by The Unlicense license
+#
+
 import argparse
 import json
 import pika
@@ -9,6 +13,9 @@ from datetime import date
 from gpiozero import CPUTemperature
 
 parser = argparse.ArgumentParser()
+
+# Requires a json file for authentication paramters
+# debug is optional
 
 parser.add_argument('-j','--json', required=True,
        metavar='json_file', help="JSON file containing the mqtt information.")
@@ -69,13 +76,13 @@ def cpu_temp():
 #End cpu_temp
 
 
+if __name__ == '__main__':
+   mqtt_data = load_json(args.json)
+   ftemp = cpu_temp()
+   now = current_time()
+   body = f'{now},{hostname},{ftemp}'
 
-mqtt_data = load_json(args.json)
-ftemp = cpu_temp()
-now = current_time()
-body = f'{now},{hostname},{ftemp}'
-
-send_mqtt(mqtt_data['user'],mqtt_data['passwd'],mqtt_data['ip'],5672,'cpu_temperature',body)
+   send_mqtt(mqtt_data['user'],mqtt_data['passwd'],mqtt_data['ip'],5672,'cpu_temperature',body)
 
 
 

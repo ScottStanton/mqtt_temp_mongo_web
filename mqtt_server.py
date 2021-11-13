@@ -1,7 +1,11 @@
 #!/usr/bin/python3
+#
+# This software is covered by The Unlicense license
+#
+
 import os, pika, pymongo, sys
 
-
+# Insert the data from the queue into an existing mongo database
 def insert_mongo(takentime, hostname, temp):
     myclient = pymongo.MongoClient("mongodb://localhost:27017/")
     mydb = myclient["cpu_temperature"]
@@ -16,6 +20,7 @@ def insert_mongo(takentime, hostname, temp):
     #    print(x) 
     myclient.close()
 
+# Takes data from the queue and formats it for the instert into the database
 def callback(body):
     values = str(body).strip('b').strip("'").split(',')
     #print(body)
@@ -28,6 +33,9 @@ def main():
     channel = connection.channel()
 
     channel.queue_declare(queue='cpu_temperature')
+
+# This loops through the messages in the queue until there are
+# none left and then it exits.
 
     while True:
         method_frame, header_frame, body = channel.basic_get(queue = 'cpu_temperature')
