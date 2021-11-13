@@ -2,7 +2,10 @@
 import argparse
 import json
 import pika
+import platform
 import sys
+import time
+from datetime import date
 from gpiozero import CPUTemperature
 
 parser = argparse.ArgumentParser()
@@ -14,11 +17,21 @@ parser.add_argument('-d','--debug', action='store_true', help="Show debugging me
 args = parser.parse_args()
 #print(args)
 
+hostname = platform.node()
 
 def debug_print(msg):
     if args.debug:
         print(f'DEBUG: {msg}')
 #End debug_print
+
+def current_time():
+    now = time.localtime()
+    now_hour = str(time.strftime("%H", now))
+    now_min = str(time.strftime("%M", now))
+    now_sec = str(time.strftime("%S", now))
+    nowdate = date.today()
+    return f'{nowdate} {now_hour}:{now_min}'
+#End current_time()
 
 def load_json(filename):
    with open(filename) as f:
@@ -58,4 +71,11 @@ def cpu_temp():
 
 
 mqtt_data = load_json(args.json)
-send_mqtt(mqtt_data['user'],mqtt_data['passwd'],mqtt_data['ip'],5672,'cpu_temperature',cpu_temp())
+ftemp = cpu_temp()
+now = current_time()
+body = f'{now},{hostname},{ftemp}'
+
+send_mqtt(mqtt_data['user'],mqtt_data['passwd'],mqtt_data['ip'],5672,'cpu_temperature',body)
+
+
+
